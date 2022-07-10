@@ -10,7 +10,7 @@ constexpr auto fold(auto &consumer) {
 }
 
 /**
- * @brief essential convertible_to but disable integral conversion
+ * @brief essentially convertible_to but disable integral conversion
  */
 template <typename T, typename S>
 concept asignable = requires(const T &t) {
