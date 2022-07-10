@@ -5,6 +5,20 @@
 
 namespace metasmith {
 
+constexpr auto fold(auto &consumer) {
+    return [&](auto &&...args) { (consumer + ... + args); };
+}
+
+/**
+ * @brief essential convertible_to but disable integral conversion
+ */
+template <typename T, typename S>
+concept asignable = requires(const T &t) {
+    { t } -> std::convertible_to<S>;
+    requires(std::is_integral_v<T> && std::is_same_v<T, S>) ||
+        !std::is_integral_v<T>;
+};
+
 template <typename Derived> class base {
 public:
     template <typename ptr_type, const std::string_view &key> struct record {
@@ -15,10 +29,6 @@ public:
 
         static constexpr auto get_key() { return key; }
     };
-
-    constexpr auto fold(auto &consumer) {
-        return [&](auto &&...args) { (consumer + ... + args); };
-    }
 
     consteval static auto generator(auto &&...args) {
         return [=](auto &&callable) { return std::invoke(callable, args...); };

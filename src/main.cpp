@@ -1,5 +1,8 @@
 
 #include "base.h"
+#include "setter.h"
+
+#include <iostream>
 // #include "metasmith.h"
 
 using namespace std::literals;
@@ -61,7 +64,7 @@ int main() {
 }
 */
 
-struct S : metasmith::base<S> {
+struct S : metasmith::setter<S> {
     int m_int;
     float m_float;
 
@@ -72,4 +75,23 @@ struct S : metasmith::base<S> {
                                            make_record<float_str>(&S::m_float));
 };
 
-int main() {}
+constexpr auto constexpr_test() {
+    constexpr auto a = [] {
+        S s{};
+        s.set("int", 1);
+        return s.m_int;
+    }();
+    static_assert(a == 1);
+}
+
+void runtime_test(int c) {
+    S s{};
+    s.set("int", c);
+    std::printf("%d == %d", c, s.m_int);
+}
+
+int main(int argc, [[maybe_unused]] char **argv) {
+
+    runtime_test(argc);
+    constexpr_test();
+}
