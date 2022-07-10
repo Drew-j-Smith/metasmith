@@ -1,5 +1,6 @@
 
 #include "base.h"
+#include "getter.h"
 #include "setter.h"
 
 #include <iostream>
@@ -64,7 +65,7 @@ int main() {
 }
 */
 
-struct S : metasmith::setter<S> {
+struct S : metasmith::setter<S>, metasmith::getter<S> {
     int m_int;
     float m_float;
 
@@ -79,15 +80,21 @@ constexpr auto constexpr_test() {
     constexpr auto a = [] {
         S s{};
         s.set("int", 1);
-        return s.m_int;
+        return s.get<int>("int").value();
     }();
     static_assert(a == 1);
+
+    constexpr auto b = [] {
+        S s{};
+        return s.get<int>("unknown");
+    }();
+    static_assert(!b.has_value());
 }
 
 void runtime_test(int c) {
     S s{};
     s.set("int", c);
-    std::printf("%d == %d", c, s.m_int);
+    std::printf("%d == %d", c, s.get<int>("int").value());
 }
 
 int main(int argc, [[maybe_unused]] char **argv) {
