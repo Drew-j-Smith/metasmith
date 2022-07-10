@@ -14,9 +14,12 @@ constexpr auto fold(auto &consumer) {
  */
 template <typename T, typename S>
 concept asignable = requires(const T &t) {
-    { t } -> std::convertible_to<S>;
-    requires(std::is_integral_v<T> && std::is_same_v<T, S>) ||
-        !std::is_integral_v<T>;
+
+    { t } -> std::convertible_to<std::remove_reference_t<S>>;
+    requires(std::is_integral_v<std::remove_reference_t<T>> &&
+             std::is_same_v<std::remove_reference_t<T>,
+                            std::remove_reference_t<S>>) ||
+        !std::is_integral_v<std::remove_reference_t<T>>;
 };
 
 template <typename Derived> class base {
