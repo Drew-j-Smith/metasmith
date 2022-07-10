@@ -1,22 +1,22 @@
 
 #include "metasmith.h"
 
+using namespace std::literals;
+
 struct S : serializable<S> {
     int m_int;
     float m_float;
 
-    static constexpr std::string_view int_str{"int"};
-    static constexpr std::string_view float_str{"float"};
+    static constexpr auto int_str{"int"sv};
+    static constexpr auto float_str{"float"sv};
 
-    static constexpr auto impl =
-        generator(s_obj<int, int_str, &S::m_int>{},
-                  s_obj<float, float_str, &S::m_float>{});
+    static constexpr auto impl = generator(make_record<int_str>(&S::m_int),
+                                           make_record<float_str>(&S::m_float));
 };
 
 constexpr auto foo() {
     S s{};
     s.set("int", 1);
-    // static_assert(err == 1);
     return s.search<int>("int");
 }
 
@@ -25,7 +25,11 @@ constexpr auto bar() {
     return s.search<float>("float");
 }
 
-template <std::string_view &str> void test() {}
+constexpr auto bar2() {
+    S s{};
+    s.set("int", 1);
+    return s.get_data<S::int_str>();
+}
 
 int main() {
     constexpr auto a = foo();
@@ -34,17 +38,21 @@ int main() {
     constexpr auto b = bar();
     static_assert(b == 2.2f);
 
+    constexpr auto c = bar2();
+    static_assert(c == 1);
+
     S s = S::deserialize("int 1 float 2.2");
     s.set("int", 2);
     std::cout << "2 == " << s.search<int>("int") << '\n';
-    static constexpr std::string_view int_str{"int"};
-    static constexpr std::string_view float_str{"float"};
-    std::cout << "2 == " << s.get_data<int_str>() << '\n';
-    std::cout << "2.2 == " << s.get_data<float_str>() << '\n';
+    std::cout << "2 == " << s.get_data<S::int_str>() << '\n';
+    std::cout << "2.2 == " << s.get_data<S::float_str>() << '\n';
     std::cout << s.serialize();
 
     S x = S::set_from_keys("int", 1, "float", 2.2f);
     std::cout << x.serialize();
+
+    // compile time constraints error b/c int is not convertable to string_view
+    // S z = S::set_from_keys(1, 1, "float", 2.2f);
 
     for (auto str : S::get_keys())
         std::cout << str << '\n';
