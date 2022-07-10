@@ -1,8 +1,10 @@
 
-#include "metasmith.h"
+#include "base.h"
+// #include "metasmith.h"
 
 using namespace std::literals;
 
+/*
 struct S : serializable<S> {
     int m_int;
     float m_float;
@@ -57,3 +59,17 @@ int main() {
     for (auto str : S::get_keys())
         std::cout << str << '\n';
 }
+*/
+
+struct S : metasmith::base<S> {
+    int m_int;
+    float m_float;
+
+    static constexpr auto int_str{"int"sv};
+    static constexpr auto float_str{"float"sv};
+
+    static constexpr auto impl = generator(make_record<int_str>(&S::m_int),
+                                           make_record<float_str>(&S::m_float));
+};
+
+int main() {}
