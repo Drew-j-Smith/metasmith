@@ -1,7 +1,5 @@
 
 #include "base.h"
-#include "getter.h"
-#include "setter.h"
 
 #include <iostream>
 // #include "metasmith.h"
@@ -65,7 +63,7 @@ int main() {
 }
 */
 
-struct S : metasmith::setter<S>, metasmith::getter<S> {
+struct S : metasmith::base<S> {
     int m_int;
     float m_float;
 
