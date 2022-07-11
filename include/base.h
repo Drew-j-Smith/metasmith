@@ -1,6 +1,9 @@
 #pragma once
 
+#include <algorithm>
+#include <array>
 #include <functional>
+#include <optional>
 #include <string_view>
 #include <type_traits>
 
@@ -23,8 +26,7 @@ concept asignable = requires(const T &t) {
         !std::is_integral_v<std::remove_reference_t<T>>;
 };
 
-template <typename Derived> class base {
-public:
+template <typename Derived> struct base {
     template <typename ptr_type, const std::string_view &key> struct record {
         using type = ptr_type;
         ptr_type Derived::*ptr;
