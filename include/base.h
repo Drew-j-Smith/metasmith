@@ -9,10 +9,6 @@
 
 namespace metasmith {
 
-constexpr auto fold(auto &consumer) {
-    return [&](auto &&...args) { (consumer + ... + args); };
-}
-
 /**
  * @brief essentially convertible_to but disable integral conversion
  */
