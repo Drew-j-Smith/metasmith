@@ -8,11 +8,13 @@ template <typename Derived> struct setter : base<Derived> {
     template <typename val_type>
     constexpr void set(const std::string_view str, val_type &&val) {
         Derived *derived_this = static_cast<Derived *>(this);
-        Derived::impl([&, val = std::forward<val_type>(val)](auto &&...args) {
+        Derived::impl([&](auto &&...args) {
             return std::array{[&]<typename record_type>(record_type obj) {
-                if constexpr (asignable<val_type, typename record_type::type>) {
+                if constexpr (std::is_convertible_v<
+                                  val_type, typename record_type::type>) {
                     if (obj.get_key() == str) {
-                        derived_this->*obj.ptr = val;
+                        derived_this->*obj.ptr =
+                            static_cast<typename record_type::type>(val);
                     }
                 }
                 return 0;

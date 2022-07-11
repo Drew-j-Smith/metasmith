@@ -9,19 +9,6 @@
 
 namespace metasmith {
 
-/**
- * @brief essentially convertible_to but disable integral conversion
- */
-template <typename T, typename S>
-concept asignable = requires(const T &t) {
-
-    { t } -> std::convertible_to<std::remove_reference_t<S>>;
-    requires(std::is_integral_v<std::remove_reference_t<T>> &&
-             std::is_same_v<std::remove_reference_t<T>,
-                            std::remove_reference_t<S>>) ||
-        !std::is_integral_v<std::remove_reference_t<T>>;
-};
-
 template <typename Derived> struct base {
     template <typename ptr_type, const std::string_view &key> struct record {
         using type = ptr_type;

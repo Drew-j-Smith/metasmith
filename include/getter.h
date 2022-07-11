@@ -11,9 +11,10 @@ template <typename Derived> struct getter : base<Derived> {
         std::optional<val_type> res;
         Derived::impl([&](auto &&...args) {
             return std::array{[&]<typename record_type>(record_type obj) {
-                if constexpr (asignable<typename record_type::type, val_type>) {
+                if constexpr (std::is_convertible_v<typename record_type::type,
+                                                    val_type>) {
                     if (obj.get_key() == str) {
-                        res = derived_this->*obj.ptr;
+                        res = static_cast<val_type>(derived_this->*obj.ptr);
                     }
                 }
                 return 0;
