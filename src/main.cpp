@@ -87,12 +87,30 @@ constexpr auto constexpr_test() {
         return s.get<int>("unknown");
     }();
     static_assert(!b.has_value());
+
+    constexpr auto c = [] {
+        S s{};
+        s.set("float"sv, 2.2, "int"sv, 1);
+        return s.m_int;
+    }();
+    static_assert(c == 1);
+
+    constexpr auto d = [] {
+        S s{};
+        s.set("float"sv, 2.2, "int"sv, 1);
+        return s.m_float;
+    }();
+    static_assert(d == 2.2f);
 }
 
 void runtime_test(int c) {
     S s{};
     s.set("int", c);
-    std::printf("%d == %d", c, s.get<int>("int").value());
+    std::printf("%d == %d\n\n", c, s.get<int>("int").value());
+
+    s.set("float"sv, 2.2 + c, "int"sv, c);
+    std::printf("%f == %f\n", 2.2 + c, s.get<float>("float").value());
+    std::printf("%d == %d\n\n", c, s.get<int>("int").value());
 }
 
 int main(int argc, [[maybe_unused]] char **argv) {
