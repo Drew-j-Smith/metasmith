@@ -52,24 +52,11 @@ public:
         });
     }
 
-    constexpr void set(auto &&...objs) {
-        std::size_t idx{};
-        std::string_view curr;
-        [&] {
-            return std::array{[&]<typename obj_type>(obj_type &&obj) {
-                if (idx % 2 == 0) {
-                    if constexpr (std::is_convertible_v<
-                                      std::remove_reference_t<obj_type>,
-                                      std::string_view>) {
-                        curr = static_cast<std::string_view>(obj);
-                    }
-                } else {
-                    derived().set(curr, obj);
-                }
-                ++idx;
-                return 0;
-            }(objs)...};
-        }();
+    template <typename val_type, typename... obj_type>
+    constexpr void set(const std::string_view str, val_type &&val,
+                       obj_type &&...objs) {
+        set(str, std::forward<val_type>(val));
+        set(std::forward<obj_type>(objs)...);
     }
 
     template <typename val_type>
