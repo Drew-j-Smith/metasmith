@@ -1,12 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <array>
-#include <functional>
-#include <optional>
-#include <string_view>
-#include <type_traits>
-
 #include "field.h"
 
 namespace metasmith {
@@ -25,8 +18,7 @@ private:
 
         template <int idx = index>
         requires(idx == index) constexpr auto get_field() const {
-            return Field{static_cast<Derived *>(nullptr), IndexHolder<index>{},
-                         key};
+            return Field{ptr, IndexHolder<index>{}, key};
         }
     };
 

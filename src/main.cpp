@@ -20,7 +20,7 @@ int main() {
 
     for (metasmith::Field field : S::get_fields()) {
         if (field.get_key() == "int"sv) {
-            std::cout << std::any_cast<int>(field.get(s)) << '\n';
+            std::cout << field.get<int>(s) << '\n';
         }
     }
 }
