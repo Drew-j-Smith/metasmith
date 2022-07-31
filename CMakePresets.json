@@ -16,7 +16,7 @@
             "inherits": "base",
             "generator": "Visual Studio 17 2022",
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "/W4 /permissive /analyze /EHsc"
+                "CMAKE_CXX_FLAGS": "/W4 /permissive- /analyze /EHsc"
             }
         },
         {
