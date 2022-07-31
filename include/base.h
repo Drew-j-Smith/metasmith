@@ -9,7 +9,7 @@
 
 namespace metasmith {
 
-template <typename Derived> class base {
+template <typename Derived> class Base {
 private:
     constexpr Derived &derived() { return *static_cast<Derived *>(this); }
 
@@ -17,23 +17,40 @@ private:
         return *static_cast<const Derived *>(this);
     }
 
-    template <typename ptr_type, const std::string_view &key> struct record {
+    template <typename ptr_type, const std::string_view &key,
+              ptr_type Derived::*ptr, int index>
+    struct record {
         using type = ptr_type;
-        ptr_type Derived::*ptr;
 
-        constexpr record(auto ptr) : ptr{ptr} {}
+        template <int idx = index>
+        requires(idx == index) static constexpr auto get_ptr() { return ptr; }
 
-        static constexpr auto get_key() { return key; }
+        template <int idx = index>
+        requires(idx == index) static constexpr auto get_key() { return key; }
+    };
+
+    template <typename... Args> struct FieldCollection : public Args... {
+        using Args::get_ptr...;
+        using Args::get_key...;
+
+        constexpr FieldCollection() = default;
     };
 
 public:
-    consteval static auto generator(auto &&...args) {
+    template <typename... Args>
+    consteval static auto generator(Args &&...args) {
         return [=](auto &&callable) { return std::invoke(callable, args...); };
     }
 
-    template <const std::string_view &key, typename ptr_type>
-    consteval static auto make_record(ptr_type Derived::*data) {
-        return record<ptr_type, key>{data};
+    template <typename... Args>
+    consteval static auto gen_fields(Args &&...args) {
+        return FieldCollection<Args...>{};
+    }
+
+    template <const std::string_view &key, typename ptr_type,
+              ptr_type Derived::*data, int index>
+    consteval static auto make_record() {
+        return record<ptr_type, key, data, index>{};
     }
 
     template <typename val_type>
@@ -43,7 +60,7 @@ public:
                 if constexpr (std::is_convertible_v<
                                   val_type, typename record_type::type>) {
                     if (obj.get_key() == str) {
-                        derived().*obj.ptr =
+                        derived().*obj.get_ptr() =
                             static_cast<typename record_type::type>(val);
                     }
                 }
@@ -67,7 +84,7 @@ public:
                 if constexpr (std::is_convertible_v<typename record_type::type,
                                                     val_type>) {
                     if (obj.get_key() == str) {
-                        res = static_cast<val_type>(derived().*obj.ptr);
+                        res = static_cast<val_type>(derived().*obj.get_ptr());
                     }
                 }
                 return 0;
