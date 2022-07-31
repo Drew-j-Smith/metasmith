@@ -1,15 +1,16 @@
-#include "base.h"
+#pragma once
 
 #include <any>
 
 namespace metasmith {
 
+template <int index> struct IndexHolder {};
+
 class Field {
 private:
+    std::string_view key;
     std::any (*get_fp)(const void *);
     void (*set_fp)(void *, const void *);
-    const std::type_info &class_type;
-    const std::type_info &val_type;
 
     template <typename T, int index>
     static std::any get_field(const void *ref) {
@@ -27,25 +28,19 @@ private:
     }
 
 public:
+    constexpr Field() : key(), get_fp(nullptr), set_fp(nullptr) {}
+
     template <typename T, int index>
-    constexpr Field(T *class_ptr, IndexHolder<index>)
-        : get_fp(get_field<T, index>), set_fp(set_field<T, index>),
-          class_type(typeid(T)),
-          val_type(
-              typeid(decltype(class_ptr->*(class_ptr->fields
-                                               .template get_ptr<index>())))) {}
+    constexpr Field(T *class_ptr, IndexHolder<index>, std::string_view key)
+        : key(key), get_fp(get_field<T, index>), set_fp(set_field<T, index>) {}
 
     template <typename T> std::any get(const T &ref) const {
-        if (class_type != typeid(T)) {
-            throw std::exception{};
-        }
         return get_fp(&ref);
     }
     template <typename T, typename S> void set(T &ref, const S &val) {
-        if (class_type != typeid(T) || val_type != typeid(S)) {
-            throw std::exception{};
-        }
         set_fp(&ref, &val);
     }
+
+    constexpr std::string_view get_key() { return key; }
 };
 } // namespace metasmith

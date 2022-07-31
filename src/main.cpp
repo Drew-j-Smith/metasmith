@@ -1,6 +1,5 @@
 
 #include "base.h"
-#include "field.h"
 
 #include <iostream>
 
@@ -14,11 +13,14 @@ struct S : metasmith::Base<S> {
         gen_fields("int", &S::m_int, "float", &S::m_float);
 };
 
-int main(int argc, [[maybe_unused]] char **argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 
-    S s{};
-    metasmith::Field field(&s, metasmith::IndexHolder<0>{});
-    field.set(s, 1);
+    S s;
+    s.m_int = 1;
 
-    std::cout << std::any_cast<int>(field.get(s)) << '\n';
+    for (auto field : S::get_fields()) {
+        if (field.get_key() == "int"sv) {
+            std::cout << std::any_cast<int>(field.get(s)) << '\n';
+        }
+    }
 }

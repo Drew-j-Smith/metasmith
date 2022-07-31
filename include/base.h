@@ -7,9 +7,9 @@
 #include <string_view>
 #include <type_traits>
 
-namespace metasmith {
+#include "field.h"
 
-template <int index> struct IndexHolder {};
+namespace metasmith {
 
 template <typename Derived> class Base {
 private:
@@ -22,21 +22,39 @@ private:
 
         template <int idx = index>
         requires(idx == index) constexpr auto get_key() const { return key; }
+
+        template <int idx = index>
+        requires(idx == index) constexpr auto get_field() const {
+            return Field{static_cast<Derived *>(nullptr), IndexHolder<index>{},
+                         key};
+        }
     };
 
     template <typename... Args> struct FieldCollection : public Args... {
         using Args::get_ptr...;
         using Args::get_key...;
+        using Args::get_field...;
 
-        constexpr FieldCollection(auto &&...args) : Args(args)... {}
+        std::array<Field, sizeof...(Args)> fields;
+
+        template <int index = 0> constexpr Field get_field_impl(int idx) {
+            if constexpr (index < sizeof...(Args)) {
+                if (idx <= 0) {
+                    return this->template get_field<index>();
+                } else {
+                    return get_field_impl<index + 1>(idx - 1);
+                }
+            } else {
+                return Field{};
+            }
+        }
+
+        constexpr FieldCollection(auto &&...args) : Args(args)... {
+            for (int i = 0; i < sizeof...(Args); i++) {
+                fields[i] = get_field_impl(i);
+            }
+        }
     };
-
-public:
-    template <typename... Args, typename PtrType>
-    consteval static auto gen_fields(const std::string_view key,
-                                     PtrType Derived::*data, Args &&...args) {
-        return gen_fields(IndexHolder<0>{}, key, data, args...);
-    }
 
     template <typename... Args, typename PtrType, int index>
     consteval static auto gen_fields(IndexHolder<index>,
@@ -58,6 +76,15 @@ public:
                                       ptr_type Derived::*data) {
         return FieldImpl<ptr_type, index>{key, data};
     }
+
+public:
+    template <typename... Args, typename PtrType>
+    consteval static auto gen_fields(const std::string_view key,
+                                     PtrType Derived::*data, Args &&...args) {
+        return gen_fields(IndexHolder<0>{}, key, data, args...);
+    }
+
+    constexpr static auto get_fields() { return Derived::fields.fields; }
 };
 
 } // namespace metasmith
