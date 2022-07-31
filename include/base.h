@@ -37,9 +37,10 @@ private:
 
         std::array<Field, sizeof...(Args)> fields;
 
-        template <int index = 0> constexpr Field get_field_impl(int idx) {
+        template <int index = 0>
+        constexpr Field get_field_impl(std::size_t idx) {
             if constexpr (index < sizeof...(Args)) {
-                if (idx <= 0) {
+                if (idx == 0) {
                     return this->template get_field<index>();
                 } else {
                     return get_field_impl<index + 1>(idx - 1);
@@ -50,7 +51,7 @@ private:
         }
 
         constexpr FieldCollection(auto &&...args) : Args(args)... {
-            for (int i = 0; i < sizeof...(Args); i++) {
+            for (std::size_t i = 0; i < sizeof...(Args); i++) {
                 fields[i] = get_field_impl(i);
             }
         }

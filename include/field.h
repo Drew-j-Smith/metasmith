@@ -31,7 +31,7 @@ public:
     constexpr Field() : key(), get_fp(nullptr), set_fp(nullptr) {}
 
     template <typename T, int index>
-    constexpr Field(T *class_ptr, IndexHolder<index>, std::string_view key)
+    constexpr Field(T *, IndexHolder<index>, std::string_view key)
         : key(key), get_fp(get_field<T, index>), set_fp(set_field<T, index>) {}
 
     template <typename T> std::any get(const T &ref) const {

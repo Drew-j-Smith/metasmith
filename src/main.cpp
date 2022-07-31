@@ -13,12 +13,12 @@ struct S : metasmith::Base<S> {
         gen_fields("int", &S::m_int, "float", &S::m_float);
 };
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
+int main() {
 
     S s;
     s.m_int = 1;
 
-    for (auto field : S::get_fields()) {
+    for (metasmith::Field field : S::get_fields()) {
         if (field.get_key() == "int"sv) {
             std::cout << std::any_cast<int>(field.get(s)) << '\n';
         }
