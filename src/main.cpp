@@ -6,7 +6,7 @@
 
 using namespace std::literals;
 
-template <typename T, typename PtrType, PtrType T::*ptr> struct FieldRef {};
+template <auto ptr> struct FieldRef {};
 
 class Field {
 private:
@@ -26,7 +26,7 @@ private:
 
 public:
     template <typename T, typename PtrType, PtrType T::*ptr>
-    constexpr Field(std::string_view key, FieldRef<T, PtrType, ptr>)
+    constexpr Field(std::string_view key, FieldRef<ptr>)
         : key(key), get_fp(get_field<T, PtrType, ptr>),
           set_fp(set_field<T, PtrType, ptr>) {}
 
@@ -48,8 +48,8 @@ struct S {
     float m_float;
 
     constexpr static auto fields =
-        std::array{Field{"int"sv, FieldRef<S, int, &S::m_int>{}},
-                   Field{"float"sv, FieldRef<S, float, &S::m_float>{}}};
+        std::array{Field{"int"sv, FieldRef<&S::m_int>{}},
+                   Field{"float"sv, FieldRef<&S::m_float>{}}};
 };
 
 int main() {
