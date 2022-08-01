@@ -15,12 +15,12 @@ private:
     void (*set_fp)(void *, const void *);
 
     template <typename T, typename PtrType, PtrType T::*ptr>
-    constexpr static const void *get_field(const void *ref) {
+    static const void *get_field(const void *ref) {
         return &(static_cast<const T *>(ref)->*ptr);
     }
 
     template <typename T, typename PtrType, PtrType T::*ptr>
-    constexpr static void set_field(void *ref, const void *val) {
+    static void set_field(void *ref, const void *val) {
         static_cast<T *>(ref)->*ptr = *static_cast<const PtrType *>(val);
     }
 
@@ -30,13 +30,12 @@ public:
         : key(key), get_fp(get_field<T, PtrType, ptr>),
           set_fp(set_field<T, PtrType, ptr>) {}
 
-    template <typename PtrType, typename T>
-    constexpr PtrType get(const T &ref) const {
+    template <typename PtrType, typename T> PtrType get(const T &ref) const {
         return *static_cast<const PtrType *>(get_fp(&ref));
     }
 
     template <typename T, typename PtrType>
-    constexpr void set(T &ref, const PtrType &val) {
+    void set(T &ref, const PtrType &val) {
         set_fp(&ref, &val);
     }
 
