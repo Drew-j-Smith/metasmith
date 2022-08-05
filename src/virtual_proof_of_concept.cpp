@@ -1,4 +1,3 @@
-
 #include <array>
 #include <iostream>
 #include <optional>
@@ -12,7 +11,7 @@ struct Field {
     std::optional<PtrType> get(ClassType &ref) const {
         if (auto ptr =
                 dynamic_cast<const Field_T<ClassType, PtrType> *>(this)) {
-            return ptr->get_impl(ref);
+            return ref.*(ptr->ptr);
         }
         return {};
     }
@@ -21,9 +20,6 @@ struct Field {
 template <typename ClassType, typename PtrType> struct Field_T : Field {
     PtrType ClassType::*ptr;
     constexpr Field_T(PtrType ClassType::*ptr) : ptr(ptr) {}
-    virtual ~Field_T() = default;
-
-    constexpr PtrType get_impl(ClassType &ref) const { return ref.*ptr; }
 };
 
 template <auto ptr> struct StaticField {
