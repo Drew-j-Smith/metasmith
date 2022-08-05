@@ -47,9 +47,7 @@ public:
         return *static_cast<const PtrType *>(get_fp(ref));
     }
 
-    template <typename PtrType> void set(T &ref, const PtrType &val) {
-        set_fp(ref, &val);
-    }
+    void set(T &ref, const auto &val) { set_fp(ref, &val); }
 
     void print(const T &ref, std::ostream &out) { print_fp(ref, out); }
 
@@ -64,9 +62,9 @@ concept Base = requires(T t) {
     []<std::size_t size>(std::array<Field<T>, size>) {}(t.fields);
 };
 
-template <Base T> std::ostream &operator<<(std::ostream &out, T t) {
+std::ostream &operator<<(std::ostream &out, Base auto t) {
     out << t.name << " { ";
-    for (auto field : T::fields) {
+    for (auto field : t.fields) {
         out << field.get_key() << ": ";
         field.print(t, out);
         out << ", ";
@@ -81,7 +79,7 @@ constexpr void hash_combine(std::size_t &seed, size_t val) {
 template <Base T> struct std::hash<T> {
     constexpr std::size_t operator()(T const &t) const {
         std::size_t seed{};
-        for (auto field : T::fields) {
+        for (auto field : t.fields) {
             hash_combine(seed, field.hash(t));
         }
         return seed;
